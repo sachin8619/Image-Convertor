@@ -3,895 +3,533 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Image Converter Pro</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Image Converter</title>
     <style>
-        :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3f37c9;
-            --accent-color: #4895ef;
-            --dark-color: #1a1a2e;
-            --light-color: #f8f9fa;
-            --success-color: #4cc9f0;
-            --warning-color: #f72585;
-            --border-radius: 8px;
-            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
-
-        * {
+        body {
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
         }
 
-        body {
-            background-color: #f5f7fa;
-            color: var(--dark-color);
-            line-height: 1.6;
+        nav {
+            background-color: #333;
+            padding: 1rem;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        nav ul li {
+            margin: 0 1rem;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        nav ul li a:hover {
+            color: #ddd;
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 1rem 0;
-            text-align: center;
-            border-radius: 0 0 var(--border-radius) var(--border-radius);
-            box-shadow: var(--box-shadow);
-            margin-bottom: 2rem;
-        }
-
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .converter-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        @media (max-width: 768px) {
-            .converter-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .upload-section, .settings-section {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            box-shadow: var(--box-shadow);
-        }
-
-        .section-title {
-            font-size: 1.3rem;
-            margin-bottom: 1rem;
-            color: var(--secondary-color);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section-title i {
-            font-size: 1.1rem;
-        }
-
-        .drop-area {
-            border: 2px dashed #ccc;
-            border-radius: var(--border-radius);
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            margin-bottom: 1rem;
-            position: relative;
-            min-height: 200px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .drop-area:hover {
-            border-color: var(--accent-color);
-        }
-
-        .drop-area.active {
-            border-color: var(--success-color);
-            background-color: rgba(76, 201, 240, 0.05);
-        }
-
-        .drop-area i {
-            font-size: 3rem;
-            color: var(--accent-color);
-            margin-bottom: 1rem;
-        }
-
-        .file-input {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
             display: none;
         }
 
-        .btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.7rem 1.5rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-size: 1rem;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-        }
-
-        .btn-outline:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-danger {
-            background-color: var(--warning-color);
-        }
-
-        .btn-danger:hover {
-            background-color: #d91a6d;
-        }
-
-        .preview-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .preview-item {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: var(--box-shadow);
-        }
-
-        .preview-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .preview-item .remove-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background-color: rgba(247, 37, 133, 0.8);
-            color: white;
-            border: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 0.7rem;
-        }
-
-        .settings-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .settings-group h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.7rem;
-            color: var(--dark-color);
-        }
-
-        .form-control {
-            margin-bottom: 1rem;
-        }
-
-        .form-control label {
+        .container.active {
             display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
         }
 
-        .form-control select, 
-        .form-control input[type="range"],
-        .form-control input[type="number"] {
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        input[type="file"], select, input[type="number"], textarea, input[type="text"], input[type="email"] {
+            display: block;
             width: 100%;
-            padding: 0.7rem;
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            font-size: 1rem;
-        }
-
-        .form-control input[type="range"] {
-            padding: 0;
-            height: 8px;
-            -webkit-appearance: none;
-            background: #ddd;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ccc;
             border-radius: 4px;
         }
 
-        .form-control input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: var(--primary-color);
-            border-radius: 50%;
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
+            display: block;
+            margin: 1rem auto;
         }
 
-        .range-value {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
-            color: #666;
+        button:hover {
+            background-color: #218838;
         }
 
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
+        #output {
             margin-top: 2rem;
-        }
-
-        .progress-container {
-            margin-top: 2rem;
-            display: none;
-        }
-
-        .progress-bar {
-            height: 10px;
-            background-color: #e9ecef;
-            border-radius: 5px;
-            overflow: hidden;
-            margin-bottom: 0.5rem;
-        }
-
-        .progress {
-            height: 100%;
-            background-color: var(--success-color);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .status-text {
-            font-size: 0.9rem;
-            color: #666;
             text-align: center;
         }
 
-        .download-section {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            box-shadow: var(--box-shadow);
-            margin-top: 2rem;
-            display: none;
-        }
-
-        .download-list {
-            list-style: none;
+        #preview {
+            max-width: 100%;
             margin-top: 1rem;
         }
 
-        .download-list li {
-            padding: 0.7rem;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        #downloadLink {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #007bff;
+            text-decoration: none;
         }
 
-        .download-list li:last-child {
-            border-bottom: none;
+        #downloadLink:hover {
+            text-decoration: underline;
         }
 
-        .file-info {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
+        form {
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .file-info i {
-            color: var(--accent-color);
+        textarea {
+            height: 100px;
+            resize: vertical;
         }
 
-        .file-size {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        footer {
+        #formResponse {
             text-align: center;
-            padding: 2rem 0;
-            margin-top: 2rem;
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        /* Toast notification */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: var(--dark-color);
-            color: white;
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            transform: translateY(100px);
-            opacity: 0;
-            transition: var(--transition);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-        }
-
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .toast.success {
-            background-color: var(--success-color);
-        }
-
-        .toast.error {
-            background-color: var(--warning-color);
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 576px) {
-            header h1 {
-                font-size: 2rem;
-            }
-            
-            .action-buttons {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
+            margin-top: 1rem;
+            color: #333;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1><i class="fas fa-exchange-alt"></i> Advanced Image Converter Pro</h1>
-            <p>Convert, resize, and optimize your images with our powerful online tool</p>
+    <nav>
+        <ul>
+            <li><a onclick="showPage('home')">Home</a></li>
+            <li><a onclick="showPage('privacy')">Privacy Policy</a></li>
+            <li><a onclick="showPage('about')">About Us</a></li>
+            <li><a onclick="showPage('contact')">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Home (Image Converter) -->
+    <div id="home" class="container active">
+        <h1>Image Converter</h1>
+        <input type="file" id="imageInput" accept="image/*">
+        <div>
+            <label for="formatSelect">Convert to:</label>
+            <select id="formatSelect">
+                <option value="jpeg">JPEG</option>
+                <option value="png">PNG</option>
+                <option value="webp">WebP</option>
+            </select>
         </div>
-    </header>
-
-    <main class="container">
-        <div class="converter-container">
-            <div class="upload-section">
-                <h2 class="section-title"><i class="fas fa-cloud-upload-alt"></i> Upload Images</h2>
-                <div id="dropArea" class="drop-area">
-                    <i class="fas fa-images"></i>
-                    <p>Drag & drop your images here or click to browse</p>
-                    <input type="file" id="fileInput" class="file-input" accept="image/*" multiple>
-                </div>
-                <button id="browseBtn" class="btn"><i class="fas fa-folder-open"></i> Browse Files</button>
-                <button id="clearBtn" class="btn btn-outline"><i class="fas fa-trash"></i> Clear All</button>
-
-                <div id="previewContainer" class="preview-container"></div>
-            </div>
-
-            <div class="settings-section">
-                <h2 class="section-title"><i class="fas fa-cog"></i> Conversion Settings</h2>
-                
-                <div class="settings-group">
-                    <h3>Output Format</h3>
-                    <div class="form-control">
-                        <label for="format">Select output format:</label>
-                        <select id="format">
-                            <option value="jpeg">JPEG</option>
-                            <option value="png">PNG</option>
-                            <option value="webp">WebP</option>
-                            <option value="gif">GIF</option>
-                            <option value="bmp">BMP</option>
-                            <option value="tiff">TIFF</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <h3>Image Quality</h3>
-                    <div class="form-control">
-                        <label for="quality">Quality: <span id="qualityValue">85</span>%</label>
-                        <input type="range" id="quality" min="1" max="100" value="85">
-                        <div class="range-value">
-                            <span>Low</span>
-                            <span>High</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <h3>Resize Options</h3>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="resizeCheckbox">
-                        <label for="resizeCheckbox">Resize images</label>
-                    </div>
-                    
-                    <div id="resizeOptions" style="display: none; margin-top: 1rem;">
-                        <div class="form-control">
-                            <label for="width">Width (px):</label>
-                            <input type="number" id="width" min="1" value="800">
-                        </div>
-                        <div class="form-control">
-                            <label for="height">Height (px):</label>
-                            <input type="number" id="height" min="1" value="600">
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="maintainAspect" checked>
-                            <label for="maintainAspect">Maintain aspect ratio</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="settings-group">
-                    <h3>Advanced Options</h3>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="optimizeCheckbox" checked>
-                        <label for="optimizeCheckbox">Optimize for web</label>
-                    </div>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="preserveMetadata">
-                        <label for="preserveMetadata">Preserve metadata</label>
-                    </div>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="grayscale">
-                        <label for="grayscale">Convert to grayscale</label>
-                    </div>
-                </div>
-
-                <div class="action-buttons">
-                    <button id="convertBtn" class="btn"><i class="fas fa-exchange-alt"></i> Convert Images</button>
-                    <button id="resetBtn" class="btn btn-outline"><i class="fas fa-redo"></i> Reset Settings</button>
-                </div>
-            </div>
+        <div>
+            <label for="resizeWidth">Resize Width (px):</label>
+            <input type="number" id="resizeWidth" placeholder="Optional">
         </div>
-
-        <div id="progressContainer" class="progress-container">
-            <h2 class="section-title"><i class="fas fa-spinner fa-spin"></i> Processing Images</h2>
-            <div class="progress-bar">
-                <div id="progress" class="progress"></div>
-            </div>
-            <p id="statusText" class="status-text">Preparing to convert images...</p>
+        <button onclick="convertImage()">Convert</button>
+        <div id="output">
+            <h3>Converted Image:</h3>
+            <img id="preview" alt="Converted image preview">
+            <a id="downloadLink" href="#" download="converted_image">Download</a>
         </div>
-
-        <div id="downloadSection" class="download-section">
-            <h2 class="section-title"><i class="fas fa-download"></i> Download Converted Images</h2>
-            <ul id="downloadList" class="download-list"></ul>
-            <div class="action-buttons">
-                <button id="downloadAllBtn" class="btn"><i class="fas fa-file-archive"></i> Download All as ZIP</button>
-                <button id="newConversionBtn" class="btn btn-outline"><i class="fas fa-plus"></i> New Conversion</button>
-            </div>
-        </div>
-    </main>
-
-    <div id="toast" class="toast">
-        <i class="fas fa-check-circle"></i>
-        <span id="toastMessage">Operation completed successfully!</span>
     </div>
 
-    <footer>
-        <div class="container">
-            <p>© 2023 Advanced Image Converter Pro. All rights reserved.</p>
-            <p>Powered by HTML5, CSS3, and JavaScript. No images are stored on our servers.</p>
-        </div>
-    </footer>
+    <!-- Privacy Policy -->
+    <div id="privacy" class="container">
+        <h1>Privacy Policy</h1>
+        <p>Your privacy is important to us. This Image Converter application processes images locally on your device using browser technologies. We do not collect, store, or transmit any personal data or images you upload.</p>
+        <h2>Data Usage</h2>
+        <p>All image processing (e.g., conversion, resizing) is performed client-side. No data is sent to our servers or third parties.</p>
+        <h2>Cookies</h2>
+        <p>This site does not use cookies or any form of tracking.</p>
+        <h2>Changes to This Policy</h2>
+        <p>We may update this policy periodically. Please check this page for the latest information.</p>
+    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <!-- About Us -->
+    <div id="about" class="container">
+        <h1>About Us</h1>
+        <p>Welcome to Image Converter, a simple and free tool designed to help you convert and resize images directly in your browser.</p>
+        <p>Our mission is to provide a fast, secure, and user-friendly experience without compromising your privacy. All processing happens locally, ensuring your images stay safe.</p>
+        <p>Created by a team passionate about web technologies, we aim to make image conversion accessible to everyone.</p>
+    </div>
+
+    <!-- Contact -->
+    <div id="contact" class="container">
+        <h1>Contact Us</h1>
+        <p>Have questions or feedback? Reach out to us!</p>
+        <form id="contactForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" required>
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+            <label for="message">Message:</label>
+            <textarea id="message" required></textarea>
+            <button type="submit">Send</button>
+        </form>
+        <p id="formResponse"></p>
+    </div>
+
     <script>
-        // DOM Elements
-        const dropArea = document.getElementById('dropArea');
-        const fileInput = document.getElementById('fileInput');
-        const browseBtn = document.getElementById('browseBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const previewContainer = document.getElementById('previewContainer');
-        const convertBtn = document.getElementById('convertBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBar = document.getElementById('progress');
-        const statusText = document.getElementById('statusText');
-        const downloadSection = document.getElementById('downloadSection');
-        const downloadList = document.getElementById('downloadList');
-        const downloadAllBtn = document.getElementById('downloadAllBtn');
-        const newConversionBtn = document.getElementById('newConversionBtn');
-        const toast = document.getElementById('toast');
-        const toastMessage = document.getElementById('toastMessage');
+        // Page Switching
+        function showPage(pageId) {
+            const pages = document.querySelectorAll('.container');
+            pages.forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
 
-        // Settings elements
-        const formatSelect = document.getElementById('format');
-        const qualitySlider = document.getElementById('quality');
-        const qualityValue = document.getElementById('qualityValue');
-        const resizeCheckbox = document.getElementById('resizeCheckbox');
-        const resizeOptions = document.getElementById('resizeOptions');
-        const widthInput = document.getElementById('width');
-        const heightInput = document.getElementById('height');
-        const maintainAspect = document.getElementById('maintainAspect');
-        const optimizeCheckbox = document.getElementById('optimizeCheckbox');
-        const preserveMetadata = document.getElementById('preserveMetadata');
-        const grayscale = document.getElementById('grayscale');
+        // Image Converter Functionality
+        function convertImage() {
+            const imageInput = document.getElementById('imageInput');
+            const formatSelect = document.getElementById('formatSelect');
+            const resizeWidth = document.getElementById('resizeWidth').value;
+            const preview = document.getElementById('preview');
+            const downloadLink = document.getElementById('downloadLink');
 
-        // Variables
-        let files = [];
-        let convertedFiles = [];
-
-        // Event Listeners
-        browseBtn.addEventListener('click', () => fileInput.click());
-        clearBtn.addEventListener('click', clearFiles);
-        fileInput.addEventListener('change', handleFileSelect);
-        convertBtn.addEventListener('click', convertImages);
-        resetBtn.addEventListener('click', resetSettings);
-        downloadAllBtn.addEventListener('click', downloadAll);
-        newConversionBtn.addEventListener('click', newConversion);
-        
-        // Drag and drop events
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, preventDefaults, false);
-        });
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropArea.addEventListener(eventName, highlight, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropArea.addEventListener(eventName, unhighlight, false);
-        });
-
-        dropArea.addEventListener('drop', handleDrop, false);
-
-        // Settings event listeners
-        qualitySlider.addEventListener('input', () => {
-            qualityValue.textContent = qualitySlider.value;
-        });
-
-        resizeCheckbox.addEventListener('change', () => {
-            resizeOptions.style.display = resizeCheckbox.checked ? 'block' : 'none';
-        });
-
-        maintainAspect.addEventListener('change', () => {
-            if (maintainAspect.checked) {
-                heightInput.readOnly = false;
+            if (!imageInput.files[0]) {
+                alert('Please select an image.');
+                return;
             }
-        });
 
-        widthInput.addEventListener('input', () => {
-            if (maintainAspect.checked && files.length > 0) {
-                // Calculate height based on first image's aspect ratio
+            const file = imageInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
                 const img = new Image();
+                img.src = e.target.result;
+
                 img.onload = function() {
-                    const aspectRatio = this.height / this.width;
-                    heightInput.value = Math.round(widthInput.value * aspectRatio);
-                };
-                img.src = URL.createObjectURL(files[0]);
-            }
-        });
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
 
-        // Functions
-        function preventDefaults(e) {
+                    // Resize if width is provided
+                    if (resizeWidth && !isNaN(resizeWidth) && resizeWidth > 0) {
+                        width = parseInt(resizeWidth);
+                        height = (img.height / img.width) * width;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convert to selected format
+                    const format = formatSelect.value;
+                    const mimeType = `image/${format}`;
+                    const dataUrl = canvas.toDataURL(mimeType);
+
+                    // Update preview and download link
+                    preview.src = dataUrl;
+                    downloadLink.href = dataUrl;
+                    downloadLink.download = `converted_image.${format}`;
+                    downloadLink.style.display = 'inline-block';
+                };
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        // Contact Form Submission (Mock)
+        document.getElementById('contactForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            e.stopPropagation();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+            const formResponse = document.getElementById('formResponse');
+
+            // Mock submission
+            formResponse.textContent = `Thank you, ${name}! Your message has been received.`;
+            document.getElementById('contactForm').reset();
+        });
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
         }
 
-        function highlight() {
-            dropArea.classList.add('active');
+        nav {
+            background-color: #333;
+            padding: 1rem;
         }
 
-        function unhighlight() {
-            dropArea.classList.remove('active');
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
         }
 
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const newFiles = dt.files;
-            handleFiles(newFiles);
+        nav ul li {
+            margin: 0 1rem;
         }
 
-        function handleFileSelect() {
-            const newFiles = fileInput.files;
-            handleFiles(newFiles);
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
         }
 
-        function handleFiles(newFiles) {
-            files = [...files, ...newFiles];
-            updateFilePreviews();
+        nav ul li a:hover {
+            color: #ddd;
         }
 
-        function updateFilePreviews() {
-            previewContainer.innerHTML = '';
-            
-            if (files.length === 0) {
-                previewContainer.innerHTML = '<p>No files selected</p>';
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: none;
+        }
+
+        .container.active {
+            display: block;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        input[type="file"], select, input[type="number"], textarea, input[type="text"], input[type="email"] {
+            display: block;
+            width: 100%;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: block;
+            margin: 1rem auto;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        #output {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        #preview {
+            max-width: 100%;
+            margin-top: 1rem;
+        }
+
+        #downloadLink {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        #downloadLink:hover {
+            text-decoration: underline;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        #formResponse {
+            text-align: center;
+            margin-top: 1rem;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a onclick="showPage('home')">Home</a></li>
+            <li><a onclick="showPage('privacy')">Privacy Policy</a></li>
+            <li><a onclick="showPage('about')">About Us</a></li>
+            <li><a onclick="showPage('contact')">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Home (Image Converter) -->
+    <div id="home" class="container active">
+        <h1>Image Converter</h1>
+        <input type="file" id="imageInput" accept="image/*">
+        <div>
+            <label for="formatSelect">Convert to:</label>
+            <select id="formatSelect">
+                <option value="jpeg">JPEG</option>
+                <option value="png">PNG</option>
+                <option value="webp">WebP</option>
+            </select>
+        </div>
+        <div>
+            <label for="resizeWidth">Resize Width (px):</label>
+            <input type="number" id="resizeWidth" placeholder="Optional">
+        </div>
+        <button onclick="convertImage()">Convert</button>
+        <div id="output">
+            <h3>Converted Image:</h3>
+            <img id="preview" alt="Converted image preview">
+            <a id="downloadLink" href="#" download="converted_image">Download</a>
+        </div>
+    </div>
+
+    <!-- Privacy Policy -->
+    <div id="privacy" class="container">
+        <h1>Privacy Policy</h1>
+        <p>Your privacy is important to us. This Image Converter application processes images locally on your device using browser technologies. We do not collect, store, or transmit any personal data or images you upload.</p>
+        <h2>Data Usage</h2>
+        <p>All image processing (e.g., conversion, resizing) is performed client-side. No data is sent to our servers or third parties.</p>
+        <h2>Cookies</h2>
+        <p>This site does not use cookies or any form of tracking.</p>
+        <h2>Changes to This Policy</h2>
+        <p>We may update this policy periodically. Please check this page for the latest information.</p>
+    </div>
+
+    <!-- About Us -->
+    <div id="about" class="container">
+        <h1>About Us</h1>
+        <p>Welcome to Image Converter, a simple and free tool designed to help you convert and resize images directly in your browser.</p>
+        <p>Our mission is to provide a fast, secure, and user-friendly experience without compromising your privacy. All processing happens locally, ensuring your images stay safe.</p>
+        <p>Created by a team passionate about web technologies, we aim to make image conversion accessible to everyone.</p>
+    </div>
+
+    <!-- Contact -->
+    <div id="contact" class="container">
+        <h1>Contact Us</h1>
+        <p>Have questions or feedback? Reach out to us!</p>
+        <form id="contactForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" required>
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+            <label for="message">Message:</label>
+            <textarea id="message" required></textarea>
+            <button type="submit">Send</button>
+        </form>
+        <p id="formResponse"></p>
+    </div>
+
+    <script>
+        // Page Switching
+        function showPage(pageId) {
+            const pages = document.querySelectorAll('.container');
+            pages.forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // Image Converter Functionality
+        function convertImage() {
+            const imageInput = document.getElementById('imageInput');
+            const formatSelect = document.getElementById('formatSelect');
+            const resizeWidth = document.getElementById('resizeWidth').value;
+            const preview = document.getElementById('preview');
+            const downloadLink = document.getElementById('downloadLink');
+
+            if (!imageInput.files[0]) {
+                alert('Please select an image.');
                 return;
             }
-            
-            files.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const previewItem = document.createElement('div');
-                    previewItem.className = 'preview-item';
-                    
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    img.alt = file.name;
-                    
-                    const removeBtn = document.createElement('button');
-                    removeBtn.className = 'remove-btn';
-                    removeBtn.innerHTML = '×';
-                    removeBtn.addEventListener('click', () => removeFile(index));
-                    
-                    previewItem.appendChild(img);
-                    previewItem.appendChild(removeBtn);
-                    previewContainer.appendChild(previewItem);
+
+            const file = imageInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Resize if width is provided
+                    if (resizeWidth && !isNaN(resizeWidth) && resizeWidth > 0) {
+                        width = parseInt(resizeWidth);
+                        height = (img.height / img.width) * width;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convert to selected format
+                    const format = formatSelect.value;
+                    const mimeType = `image/${format}`;
+                    const dataUrl = canvas.toDataURL(mimeType);
+
+                    // Update preview and download link
+                    preview.src = dataUrl;
+                    downloadLink.href = dataUrl;
+                    downloadLink.download = `converted_image.${format}`;
+                    downloadLink.style.display = 'inline-block';
                 };
-                reader.readAsDataURL(file);
-            });
+            };
+
+            reader.readAsDataURL(file);
         }
 
-        function removeFile(index) {
-            files.splice(index, 1);
-            updateFilePreviews();
-        }
+        // Contact Form Submission (Mock)
+        document.getElementById('contactForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+            const formResponse = document.getElementById('formResponse');
 
-        function clearFiles() {
-            files = [];
-            updateFilePreviews();
-            fileInput.value = '';
-        }
-
-        function resetSettings() {
-            formatSelect.value = 'jpeg';
-            qualitySlider.value = 85;
-            qualityValue.textContent = '85';
-            resizeCheckbox.checked = false;
-            resizeOptions.style.display = 'none';
-            widthInput.value = '800';
-            heightInput.value = '600';
-            maintainAspect.checked = true;
-            optimizeCheckbox.checked = true;
-            preserveMetadata.checked = false;
-            grayscale.checked = false;
-        }
-
-        function showToast(message, type = 'success') {
-            toast.className = `toast ${type}`;
-            toastMessage.textContent = message;
-            toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        async function convertImages() {
-            if (files.length === 0) {
-                showToast('Please select at least one image to convert', 'error');
-                return;
-            }
-
-            // Show progress
-            progressContainer.style.display = 'block';
-            progressBar.style.width = '0%';
-            statusText.textContent = 'Starting conversion...';
-            convertBtn.disabled = true;
-
-            convertedFiles = [];
-            const zip = new JSZip();
-            const imgFolder = zip.folder("converted_images");
-
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                statusText.textContent = `Processing ${i + 1} of ${files.length}: ${file.name}`;
-                progressBar.style.width = `${(i / files.length) * 100}%`;
-
-                try {
-                    const convertedFile = await processImage(file);
-                    convertedFiles.push(convertedFile);
-                    
-                    // Add to ZIP
-                    imgFolder.file(convertedFile.name, convertedFile.blob);
-                } catch (error) {
-                    console.error(`Error processing ${file.name}:`, error);
-                }
-            }
-
-            // Complete
-            progressBar.style.width = '100%';
-            statusText.textContent = 'Conversion complete!';
-            convertBtn.disabled = false;
-            
-            // Show download section
-            showDownloadSection();
-            showToast(`Successfully converted ${convertedFiles.length} images`);
-        }
-
-        function processImage(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = function() {
-                        // Create canvas
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        
-                        // Calculate new dimensions
-                        let newWidth = img.width;
-                        let newHeight = img.height;
-                        
-                        if (resizeCheckbox.checked) {
-                            newWidth = parseInt(widthInput.value);
-                            newHeight = parseInt(heightInput.value);
-                            
-                            if (maintainAspect.checked) {
-                                const aspectRatio = img.height / img.width;
-                                newHeight = Math.round(newWidth * aspectRatio);
-                            }
-                        }
-                        
-                        // Set canvas dimensions
-                        canvas.width = newWidth;
-                        canvas.height = newHeight;
-                        
-                        // Apply grayscale if needed
-                        if (grayscale.checked) {
-                            ctx.filter = 'grayscale(100%)';
-                        }
-                        
-                        // Draw image
-                        ctx.drawImage(img, 0, 0, newWidth, newHeight);
-                        
-                        // Get output format
-                        let format = formatSelect.value;
-                        if (format === 'jpg') format = 'jpeg'; // Correct MIME type
-                        
-                        // Quality (only applies to JPEG/WebP)
-                        let quality = parseInt(qualitySlider.value) / 100;
-                        if (format !== 'jpeg' && format !== 'webp') {
-                            quality = undefined;
-                        }
-                        
-                        // Convert to blob
-                        canvas.toBlob((blob) => {
-                            // Create new file name
-                            const fileName = file.name.replace(/\.[^/.]+$/, '') + '.' + format;
-                            
-                            resolve({
-                                name: fileName,
-                                blob: blob,
-                                url: URL.createObjectURL(blob)
-                            });
-                        }, `image/${format}`, quality);
-                    };
-                    img.onerror = reject;
-                    img.src = e.target.result;
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function showDownloadSection() {
-            downloadSection.style.display = 'block';
-            downloadList.innerHTML = '';
-            
-            convertedFiles.forEach(file => {
-                const li = document.createElement('li');
-                
-                const fileInfo = document.createElement('div');
-                fileInfo.className = 'file-info';
-                fileInfo.innerHTML = `
-                    <i class="fas fa-file-image"></i>
-                    <div>
-                        <div>${file.name}</div>
-                        <div class="file-size">${formatFileSize(file.blob.size)}</div>
-                    </div>
-                `;
-                
-                const downloadBtn = document.createElement('button');
-                downloadBtn.className = 'btn btn-outline';
-                downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
-                downloadBtn.addEventListener('click', () => downloadFile(file));
-                
-                li.appendChild(fileInfo);
-                li.appendChild(downloadBtn);
-                downloadList.appendChild(li);
-            });
-            
-            // Scroll to download section
-            downloadSection.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function downloadFile(file) {
-            saveAs(file.blob, file.name);
-            showToast(`Downloaded ${file.name}`);
-        }
-
-        function downloadAll() {
-            if (convertedFiles.length === 0) return;
-            
-            // Generate ZIP
-            const zip = new JSZip();
-            const imgFolder = zip.folder("converted_images");
-            
-            convertedFiles.forEach(file => {
-                imgFolder.file(file.name, file.blob);
-            });
-            
-            // Generate ZIP file
-            zip.generateAsync({ type: 'blob' }).then(content => {
-                saveAs(content, 'converted_images.zip');
-                showToast('Downloaded all files as ZIP archive');
-            });
-        }
-
-        function newConversion() {
-            files = [];
-            convertedFiles = [];
-            updateFilePreviews();
-            downloadSection.style.display = 'none';
-            progressContainer.style.display = 'none';
-            fileInput.value = '';
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
+            // Mock submission
+            formResponse.textContent = `Thank you, ${name}! Your message has been received.`;
+            document.getElementById('contactForm').reset();
+        });
     </script>
 </body>
 </html>

@@ -5,82 +5,186 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Converter</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e0e7ff, #f3e8ff);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
         nav {
-            background-color: #333;
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
             padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         nav ul {
             list-style: none;
-            margin: 0;
-            padding: 0;
             display: flex;
             justify-content: center;
+            gap: 2rem;
         }
 
         nav ul li {
-            margin: 0 1rem;
+            animation: slideIn 0.5s ease forwards;
+            animation-delay: calc(var(--i) * 0.1s);
+            opacity: 0;
         }
+
+        nav ul li:nth-child(1) { --i: 1; }
+        nav ul li:nth-child(2) { --i: 2; }
+        nav ul li:nth-child(3) { --i: 3; }
+        nav ul li:nth-child(4) { --i: 4; }
 
         nav ul li a {
             color: white;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: background 0.3s, transform 0.2s;
             cursor: pointer;
+            display: inline-block;
         }
 
         nav ul li a:hover {
-            color: #ddd;
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        nav ul li a:active {
+            transform: scale(0.95);
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 2rem auto;
-            padding: 1rem;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+            padding: 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
             display: none;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.4s ease, transform 0.4s ease;
         }
 
         .container.active {
             display: block;
+            opacity: 1;
+            transform: scale(1);
         }
 
         h1 {
             text-align: center;
-            color: #333;
+            color: #1e3a8a;
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            animation: fadeIn 0.6s ease;
+        }
+
+        h2 {
+            color: #1e3a8a;
+            margin: 1rem 0 0.5rem;
+        }
+
+        p {
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            color: #1e3a8a;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            transition: transform 0.3s;
         }
 
         input[type="file"], select, input[type="number"], textarea, input[type="text"], input[type="email"] {
-            display: block;
             width: 100%;
-            padding: 0.5rem;
+            padding: 0.75rem;
             margin: 0.5rem 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            transform: scale(1.02);
         }
 
         button {
-            background-color: #28a745;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
             color: white;
-            padding: 0.75rem 1.5rem;
+            padding: 0.75rem 2rem;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
             display: block;
-            margin: 1rem auto;
+            margin: 1.5rem auto;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
         }
 
         button:hover {
-            background-color: #218838;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s, height 0.4s;
+            pointer-events: none;
+        }
+
+        button:hover::after {
+            width: 200px;
+            height: 200px;
         }
 
         #output {
@@ -90,18 +194,33 @@
 
         #preview {
             max-width: 100%;
+            border-radius: 8px;
             margin-top: 1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        #preview.loaded {
+            opacity: 1;
+            transform: translateX(0);
         }
 
         #downloadLink {
             display: inline-block;
             margin-top: 1rem;
-            color: #007bff;
+            color: #3b82f6;
+            font-weight: 600;
             text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background 0.3s, transform 0.2s;
         }
 
         #downloadLink:hover {
-            text-decoration: underline;
+            background: rgba(59, 130, 246, 0.1);
+            transform: scale(1.05);
         }
 
         form {
@@ -110,14 +229,76 @@
         }
 
         textarea {
-            height: 100px;
+            height: 120px;
             resize: vertical;
         }
 
         #formResponse {
             text-align: center;
             margin-top: 1rem;
-            color: #333;
+            color: #166534;
+            font-weight: 500;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        #formResponse.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .loader {
+            display: none;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 1s linear infinite, pulse 1.5s ease-in-out infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            button {
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -134,60 +315,71 @@
     <!-- Home (Image Converter) -->
     <div id="home" class="container active">
         <h1>Image Converter</h1>
-        <input type="file" id="imageInput" accept="image/*">
-        <div>
-            <label for="formatSelect">Convert to:</label>
+        <div class="input-group">
+            <label for="imageInput">Select Image</label>
+            <input type="file" id="imageInput" accept="image/*">
+        </div>
+        <div class="input-group">
+            <label for="formatSelect">Convert to</label>
             <select id="formatSelect">
                 <option value="jpeg">JPEG</option>
                 <option value="png">PNG</option>
                 <option value="webp">WebP</option>
             </select>
         </div>
-        <div>
-            <label for="resizeWidth">Resize Width (px):</label>
-            <input type="number" id="resizeWidth" placeholder="Optional">
+        <div class="input-group">
+            <label for="resizeWidth">Resize Width (px, optional)</label>
+            <input type="number" id="resizeWidth" placeholder="e.g., 800">
         </div>
-        <button onclick="convertImage()">Convert</button>
+        <button id="convertButton" onclick="convertImage()">Convert</button>
+        <div id="loader" class="loader"></div>
         <div id="output">
-            <h3>Converted Image:</h3>
+            <h3>Converted Image</h3>
             <img id="preview" alt="Converted image preview">
-            <a id="downloadLink" href="#" download="converted_image">Download</a>
+            <a id="downloadLink" href="#" download="converted_image">Download Image</a>
         </div>
     </div>
 
     <!-- Privacy Policy -->
     <div id="privacy" class="container">
         <h1>Privacy Policy</h1>
-        <p>Your privacy is important to us. This Image Converter application processes images locally on your device using browser technologies. We do not collect, store, or transmit any personal data or images you upload.</p>
+        <p>Your privacy is our priority. This Image Converter processes all images locally on your device using browser technology, ensuring no personal data or images are collected, stored, or transmitted.</p>
         <h2>Data Usage</h2>
-        <p>All image processing (e.g., conversion, resizing) is performed client-side. No data is sent to our servers or third parties.</p>
-        <h2>Cookies</h2>
-        <p>This site does not use cookies or any form of tracking.</p>
-        <h2>Changes to This Policy</h2>
-        <p>We may update this policy periodically. Please check this page for the latest information.</p>
+        <p>All conversions and resizing occur client-side. No data is sent to servers or third parties.</p>
+        <h2>Cookies & Tracking</h2>
+        <p>We do not use cookies or any tracking mechanisms.</p>
+        <h2>Policy Updates</h2>
+        <p>This policy may be updated occasionally. Please revisit for the latest information.</p>
     </div>
 
     <!-- About Us -->
     <div id="about" class="container">
         <h1>About Us</h1>
-        <p>Welcome to Image Converter, a simple and free tool designed to help you convert and resize images directly in your browser.</p>
-        <p>Our mission is to provide a fast, secure, and user-friendly experience without compromising your privacy. All processing happens locally, ensuring your images stay safe.</p>
-        <p>Created by a team passionate about web technologies, we aim to make image conversion accessible to everyone.</p>
+        <p>Welcome to Image Converter, your go-to tool for fast, secure, and free image conversion directly in your browser.</p>
+        <p>Our goal is to deliver a seamless experience while prioritizing your privacy. All processing is done locally, keeping your images safe.</p>
+        <p>Built by a team passionate about intuitive web tools, we’re here to simplify image conversion for everyone.</p>
     </div>
 
     <!-- Contact -->
     <div id="contact" class="container">
         <h1>Contact Us</h1>
-        <p>Have questions or feedback? Reach out to us!</p>
+        <p>Questions or suggestions? We’d love to hear from you!</p>
         <form id="contactForm">
-            <label for="name">Name:</label>
-            <input type="text" id="name" required>
-            <label for="email">Email:</label>
-            <input type="email" id="email" required>
-            <label for="message">Message:</label>
-            <textarea id="message" required></textarea>
-            <button type="submit">Send</button>
+            <div class="input-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="input-group">
+                <label for="message">Message</label>
+                <textarea id="message" required></textarea>
+            </div>
+            <button type="submit" id="submitButton">Send Message</button>
         </form>
+        <div id="loaderContact" class="loader"></div>
         <p id="formResponse"></p>
     </div>
 
@@ -197,6 +389,7 @@
             const pages = document.querySelectorAll('.container');
             pages.forEach(page => page.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // Image Converter Functionality
@@ -206,11 +399,17 @@
             const resizeWidth = document.getElementById('resizeWidth').value;
             const preview = document.getElementById('preview');
             const downloadLink = document.getElementById('downloadLink');
+            const convertButton = document.getElementById('convertButton');
+            const loader = document.getElementById('loader');
 
             if (!imageInput.files[0]) {
                 alert('Please select an image.');
                 return;
             }
+
+            convertButton.disabled = true;
+            loader.style.display = 'block';
+            preview.classList.remove('loaded');
 
             const file = imageInput.files[0];
             const reader = new FileReader();
@@ -224,7 +423,6 @@
                     let width = img.width;
                     let height = img.height;
 
-                    // Resize if width is provided
                     if (resizeWidth && !isNaN(resizeWidth) && resizeWidth > 0) {
                         width = parseInt(resizeWidth);
                         height = (img.height / img.width) * width;
@@ -235,16 +433,18 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // Convert to selected format
                     const format = formatSelect.value;
                     const mimeType = `image/${format}`;
                     const dataUrl = canvas.toDataURL(mimeType);
 
-                    // Update preview and download link
                     preview.src = dataUrl;
+                    preview.classList.add('loaded');
                     downloadLink.href = dataUrl;
                     downloadLink.download = `converted_image.${format}`;
                     downloadLink.style.display = 'inline-block';
+
+                    convertButton.disabled = false;
+                    loader.style.display = 'none';
                 };
             };
 
@@ -258,277 +458,20 @@
             const email = document.getElementById('email').value;
             const message = document.getElementById('message').value;
             const formResponse = document.getElementById('formResponse');
+            const submitButton = document.getElementById('submitButton');
+            const loader = document.getElementById('loaderContact');
 
-            // Mock submission
-            formResponse.textContent = `Thank you, ${name}! Your message has been received.`;
-            document.getElementById('contactForm').reset();
-        });
-    </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Converter</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
+            submitButton.disabled = true;
+            loader.style.display = 'block';
+            formResponse.classList.remove('show');
 
-        nav {
-            background-color: #333;
-            padding: 1rem;
-        }
-
-        nav ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-        }
-
-        nav ul li {
-            margin: 0 1rem;
-        }
-
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        nav ul li a:hover {
-            color: #ddd;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 1rem;
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            display: none;
-        }
-
-        .container.active {
-            display: block;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        input[type="file"], select, input[type="number"], textarea, input[type="text"], input[type="email"] {
-            display: block;
-            width: 100%;
-            padding: 0.5rem;
-            margin: 0.5rem 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        button {
-            background-color: #28a745;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            display: block;
-            margin: 1rem auto;
-        }
-
-        button:hover {
-            background-color: #218838;
-        }
-
-        #output {
-            margin-top: 2rem;
-            text-align: center;
-        }
-
-        #preview {
-            max-width: 100%;
-            margin-top: 1rem;
-        }
-
-        #downloadLink {
-            display: inline-block;
-            margin-top: 1rem;
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        #downloadLink:hover {
-            text-decoration: underline;
-        }
-
-        form {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        textarea {
-            height: 100px;
-            resize: vertical;
-        }
-
-        #formResponse {
-            text-align: center;
-            margin-top: 1rem;
-            color: #333;
-        }
-    </style>
-</head>
-<body>
-    <nav>
-        <ul>
-            <li><a onclick="showPage('home')">Home</a></li>
-            <li><a onclick="showPage('privacy')">Privacy Policy</a></li>
-            <li><a onclick="showPage('about')">About Us</a></li>
-            <li><a onclick="showPage('contact')">Contact</a></li>
-        </ul>
-    </nav>
-
-    <!-- Home (Image Converter) -->
-    <div id="home" class="container active">
-        <h1>Image Converter</h1>
-        <input type="file" id="imageInput" accept="image/*">
-        <div>
-            <label for="formatSelect">Convert to:</label>
-            <select id="formatSelect">
-                <option value="jpeg">JPEG</option>
-                <option value="png">PNG</option>
-                <option value="webp">WebP</option>
-            </select>
-        </div>
-        <div>
-            <label for="resizeWidth">Resize Width (px):</label>
-            <input type="number" id="resizeWidth" placeholder="Optional">
-        </div>
-        <button onclick="convertImage()">Convert</button>
-        <div id="output">
-            <h3>Converted Image:</h3>
-            <img id="preview" alt="Converted image preview">
-            <a id="downloadLink" href="#" download="converted_image">Download</a>
-        </div>
-    </div>
-
-    <!-- Privacy Policy -->
-    <div id="privacy" class="container">
-        <h1>Privacy Policy</h1>
-        <p>Your privacy is important to us. This Image Converter application processes images locally on your device using browser technologies. We do not collect, store, or transmit any personal data or images you upload.</p>
-        <h2>Data Usage</h2>
-        <p>All image processing (e.g., conversion, resizing) is performed client-side. No data is sent to our servers or third parties.</p>
-        <h2>Cookies</h2>
-        <p>This site does not use cookies or any form of tracking.</p>
-        <h2>Changes to This Policy</h2>
-        <p>We may update this policy periodically. Please check this page for the latest information.</p>
-    </div>
-
-    <!-- About Us -->
-    <div id="about" class="container">
-        <h1>About Us</h1>
-        <p>Welcome to Image Converter, a simple and free tool designed to help you convert and resize images directly in your browser.</p>
-        <p>Our mission is to provide a fast, secure, and user-friendly experience without compromising your privacy. All processing happens locally, ensuring your images stay safe.</p>
-        <p>Created by a team passionate about web technologies, we aim to make image conversion accessible to everyone.</p>
-    </div>
-
-    <!-- Contact -->
-    <div id="contact" class="container">
-        <h1>Contact Us</h1>
-        <p>Have questions or feedback? Reach out to us!</p>
-        <form id="contactForm">
-            <label for="name">Name:</label>
-            <input type="text" id="name" required>
-            <label for="email">Email:</label>
-            <input type="email" id="email" required>
-            <label for="message">Message:</label>
-            <textarea id="message" required></textarea>
-            <button type="submit">Send</button>
-        </form>
-        <p id="formResponse"></p>
-    </div>
-
-    <script>
-        // Page Switching
-        function showPage(pageId) {
-            const pages = document.querySelectorAll('.container');
-            pages.forEach(page => page.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-        }
-
-        // Image Converter Functionality
-        function convertImage() {
-            const imageInput = document.getElementById('imageInput');
-            const formatSelect = document.getElementById('formatSelect');
-            const resizeWidth = document.getElementById('resizeWidth').value;
-            const preview = document.getElementById('preview');
-            const downloadLink = document.getElementById('downloadLink');
-
-            if (!imageInput.files[0]) {
-                alert('Please select an image.');
-                return;
-            }
-
-            const file = imageInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                const img = new Image();
-                img.src = e.target.result;
-
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-
-                    // Resize if width is provided
-                    if (resizeWidth && !isNaN(resizeWidth) && resizeWidth > 0) {
-                        width = parseInt(resizeWidth);
-                        height = (img.height / img.width) * width;
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    // Convert to selected format
-                    const format = formatSelect.value;
-                    const mimeType = `image/${format}`;
-                    const dataUrl = canvas.toDataURL(mimeType);
-
-                    // Update preview and download link
-                    preview.src = dataUrl;
-                    downloadLink.href = dataUrl;
-                    downloadLink.download = `converted_image.${format}`;
-                    downloadLink.style.display = 'inline-block';
-                };
-            };
-
-            reader.readAsDataURL(file);
-        }
-
-        // Contact Form Submission (Mock)
-        document.getElementById('contactForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const message = document.getElementById('message').value;
-            const formResponse = document.getElementById('formResponse');
-
-            // Mock submission
-            formResponse.textContent = `Thank you, ${name}! Your message has been received.`;
-            document.getElementById('contactForm').reset();
+            setTimeout(() => {
+                formResponse.textContent = `Thank you, ${name}! Your message has been received.`;
+                formResponse.classList.add('show');
+                document.getElementById('contactForm').reset();
+                submitButton.disabled = false;
+                loader.style.display = 'none';
+            }, 1000);
         });
     </script>
 </body>

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Image Converter Pro</title>
+    <!-- AdMob Script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1411814617259739" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -59,6 +61,32 @@
             opacity: 0.9;
         }
 
+        /* AdMob Container Styles */
+        .ad-container {
+            margin: 2rem auto;
+            padding: 1rem;
+            text-align: center;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            max-width: 1200px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .top-ad {
+            margin-top: -1rem;
+            margin-bottom: 2rem;
+        }
+
+        .middle-ad {
+            margin: 2rem auto;
+        }
+
+        .bottom-ad {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
         .converter-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -70,6 +98,16 @@
         @media (max-width: 768px) {
             .converter-container {
                 grid-template-columns: 1fr;
+            }
+            
+            .ad-container {
+                margin: 1rem auto;
+                padding: 0.5rem;
+            }
+            
+            .top-ad {
+                margin-top: -0.5rem;
+                margin-bottom: 1rem;
             }
         }
 
@@ -647,6 +685,19 @@
         </div>
     </header>
 
+    <!-- Top Ad Banner -->
+    <div class="ad-container top-ad">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-1411814617259739"
+             data-ad-slot="ca-app-pub-1411814617259739/9209562569"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+
     <main class="container">
         <div class="converter-container">
             <div class="upload-section">
@@ -738,6 +789,19 @@
             </div>
         </div>
 
+        <!-- Middle Ad Banner -->
+        <div class="ad-container middle-ad">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-1411814617259739"
+                 data-ad-slot="ca-app-pub-1411814617259739/1875957908"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+
         <div id="progressContainer" class="progress-container">
             <h2 class="section-title"><i class="fas fa-spinner fa-spin"></i> Processing Images</h2>
             <div class="progress-bar">
@@ -755,6 +819,19 @@
             </div>
         </div>
     </main>
+
+    <!-- Bottom Ad Banner -->
+    <div class="ad-container bottom-ad">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-1411814617259739"
+             data-ad-slot="ca-app-pub-1411814617259739/6583399221"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
 
     <div id="toast" class="toast">
         <i class="fas fa-check-circle"></i>
@@ -1152,6 +1229,9 @@
             // Show download section with animation
             showDownloadSection();
             showToast(`Successfully converted ${convertedFiles.length} images`);
+            
+            // Show interstitial ad after conversion (mobile only)
+            showInterstitialAd();
         }
 
         function animateProgress(element, target) {
@@ -1345,6 +1425,19 @@
             const sizes = ['Bytes', 'KB', 'MB', 'GB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Interstitial Ad Function
+        function showInterstitialAd() {
+            // Only show on mobile devices
+            if (/Mobi|Android/i.test(navigator.userAgent)) {
+                // Show interstitial ad after conversion is complete
+                if (typeof admob !== 'undefined') {
+                    admob.interstitial.show()
+                        .then(() => console.log('Interstitial ad shown'))
+                        .catch(e => console.log('Error showing interstitial', e));
+                }
+            }
         }
     </script>
 </body>

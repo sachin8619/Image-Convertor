@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Image Converter Pro</title>
-    <!-- AdMob Script -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1411814617259739" crossorigin="anonymous"></script>
+    <!-- AdSense Script - Changed to use Test Publisher ID -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3940256099942544" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -61,7 +61,7 @@
             opacity: 0.9;
         }
 
-        /* AdMob Container Styles */
+        /* Ad Container Styles */
         .ad-container {
             margin: 2rem auto;
             padding: 1rem;
@@ -71,6 +71,8 @@
             box-shadow: var(--box-shadow);
             max-width: 1200px;
             animation: fadeIn 0.5s ease-out;
+            /* Ensure ad containers have some min-height to be visible before ad loads */
+            min-height: 50px; 
         }
 
         .top-ad {
@@ -686,11 +688,24 @@
     </header>
 
     <!-- Top Ad Banner -->
+    <!-- 
+        NOTE FOR LIVE ADS:
+        To use your real AdSense ad units:
+        1. Replace `ca-pub-3940256099942544` with your actual AdSense Publisher ID 
+           (e.g., `ca-pub-1411814617259739`) in the AdSense script tag in <head> 
+           and in all `data-ad-client` attributes below.
+        2. Ensure that the `data-ad-slot` values (e.g., `9209562569`) are valid 
+           AdSense Ad Unit IDs created under your AdSense account. The format for 
+           `data-ad-slot` should be just the 10-digit Ad Unit ID.
+        3. Your AdSense account must be approved, and your site/domain verified. 
+           Ads may not show on `file:///` URLs or `localhost` with real ad units.
+        4. Remove or disable ad blockers during testing.
+    -->
     <div class="ad-container top-ad">
         <ins class="adsbygoogle"
              style="display:block"
-             data-ad-client="ca-pub-1411814617259739"
-             data-ad-slot="1411814617259739/9209562569"
+             data-ad-client="ca-pub-3940256099942544"
+             data-ad-slot="9209562569"
              data-ad-format="auto"
              data-full-width-responsive="true"></ins>
         <script>
@@ -793,8 +808,8 @@
         <div class="ad-container middle-ad">
             <ins class="adsbygoogle"
                  style="display:block"
-                 data-ad-client="ca-pub-1411814617259739"
-                 data-ad-slot="1411814617259739/1875957908"
+                 data-ad-client="ca-pub-3940256099942544"
+                 data-ad-slot="1875957908"
                  data-ad-format="auto"
                  data-full-width-responsive="true"></ins>
             <script>
@@ -824,8 +839,8 @@
     <div class="ad-container bottom-ad">
         <ins class="adsbygoogle"
              style="display:block"
-             data-ad-client="ca-pub-1411814617259739"
-             data-ad-slot="1411814617259739/6583399221"
+             data-ad-client="ca-pub-3940256099942544"
+             data-ad-slot="6583399221"
              data-ad-format="auto"
              data-full-width-responsive="true"></ins>
         <script>
@@ -927,21 +942,30 @@
 
         maintainAspect.addEventListener('change', () => {
             if (maintainAspect.checked) {
-                heightInput.readOnly = false;
+                heightInput.readOnly = false; // This logic seems reversed, should be related to auto-calculation
+            }
+        });
+        
+        let originalWidth = 0, originalHeight = 0;
+
+        widthInput.addEventListener('input', () => {
+            if (maintainAspect.checked && files.length > 0 && originalWidth > 0 && originalHeight > 0) {
+                const aspectRatio = originalHeight / originalWidth;
+                if (widthInput.value > 0) {
+                    heightInput.value = Math.round(widthInput.value * aspectRatio);
+                }
+            }
+        });
+        
+        heightInput.addEventListener('input', () => {
+            if (maintainAspect.checked && files.length > 0 && originalWidth > 0 && originalHeight > 0) {
+                const aspectRatio = originalWidth / originalHeight;
+                if (heightInput.value > 0) {
+                    widthInput.value = Math.round(heightInput.value * aspectRatio);
+                }
             }
         });
 
-        widthInput.addEventListener('input', () => {
-            if (maintainAspect.checked && files.length > 0) {
-                // Calculate height based on first image's aspect ratio
-                const img = new Image();
-                img.onload = function() {
-                    const aspectRatio = this.height / this.width;
-                    heightInput.value = Math.round(widthInput.value * aspectRatio);
-                };
-                img.src = URL.createObjectURL(files[0]);
-            }
-        });
 
         // Functions
         function preventDefaults(e) {
@@ -968,14 +992,46 @@
             handleFiles(newFiles);
         }
 
-        function handleFiles(newFiles) {
-            if (newFiles.length === 0) return;
+        function handleFiles(inputFiles) {
+            if (inputFiles.length === 0) return;
             
+            const imageFiles = Array.from(inputFiles).filter(file => file.type.startsWith('image/'));
+            if(imageFiles.length !== inputFiles.length){
+                showToast('Some files were not images and were ignored.', 'warning');
+            }
+            if(imageFiles.length === 0) return;
+
+
             // Add slight delay for animation effect
             setTimeout(() => {
-                files = [...files, ...newFiles];
+                files = [...files, ...imageFiles];
                 updateFilePreviews();
-                showToast(`Added ${newFiles.length} file(s)`);
+                showToast(`Added ${imageFiles.length} image file(s)`);
+
+                // If this is the first file, try to populate resize dimensions
+                if (files.length === imageFiles.length && imageFiles.length > 0) {
+                    const firstFile = imageFiles[0];
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = function() {
+                            originalWidth = this.width;
+                            originalHeight = this.height;
+                            if (!resizeCheckbox.checked) { // Only set if resize is not already active with custom values
+                                widthInput.value = this.width;
+                                heightInput.value = this.height;
+                            } else { // if resize is checked, update height based on aspect ratio of new image
+                                 if (maintainAspect.checked && widthInput.value > 0) {
+                                    const aspectRatio = this.height / this.width;
+                                    heightInput.value = Math.round(widthInput.value * aspectRatio);
+                                }
+                            }
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(firstFile);
+                }
+
             }, 300);
         }
 
@@ -983,7 +1039,9 @@
             previewContainer.innerHTML = '';
             
             if (files.length === 0) {
-                previewContainer.innerHTML = '<p>No files selected</p>';
+                // previewContainer.innerHTML = '<p>No files selected</p>'; // Optional: can leave it empty
+                originalWidth = 0; // Reset original dimensions
+                originalHeight = 0;
                 return;
             }
             
@@ -1001,8 +1059,8 @@
                     const removeBtn = document.createElement('button');
                     removeBtn.className = 'remove-btn';
                     removeBtn.innerHTML = '×';
-                    removeBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
+                    removeBtn.addEventListener('click', (evt) => {
+                        evt.stopPropagation();
                         removeFile(index);
                     });
                     
@@ -1030,7 +1088,7 @@
             modal.style.display = 'flex';
             modal.style.justifyContent = 'center';
             modal.style.alignItems = 'center';
-            modal.style.zIndex = '1000';
+            modal.style.zIndex = '2000'; // Ensure it's above other elements
             modal.style.opacity = '0';
             modal.style.transition = 'opacity 0.3s ease';
             
@@ -1073,23 +1131,27 @@
                 img.style.transform = 'scale(1)';
             }, 10);
             
-            // Close modal
-            closeBtn.addEventListener('click', () => {
+            const closeModal = () => {
                 modal.style.opacity = '0';
                 img.style.transform = 'scale(0.9)';
                 setTimeout(() => {
-                    document.body.removeChild(modal);
+                    if (document.body.contains(modal)) {
+                         document.body.removeChild(modal);
+                    }
                 }, 300);
-            });
+            };
             
-            // Also close when clicking outside image
+            closeBtn.addEventListener('click', closeModal);
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
-                    modal.style.opacity = '0';
-                    img.style.transform = 'scale(0.9)';
-                    setTimeout(() => {
-                        document.body.removeChild(modal);
-                    }, 300);
+                    closeModal();
+                }
+            });
+             // Close with Escape key
+            document.addEventListener('keydown', function onKeyDown(e) {
+                if (e.key === "Escape") {
+                    closeModal();
+                    document.removeEventListener('keydown', onKeyDown);
                 }
             });
         }
@@ -1102,8 +1164,28 @@
                 previewItems[index].style.opacity = '0';
                 setTimeout(() => {
                     files.splice(index, 1);
-                    updateFilePreviews();
+                    updateFilePreviews(); // This will re-render previews
                     showToast('File removed');
+                    if (files.length === 0) {
+                        originalWidth = 0;
+                        originalHeight = 0;
+                    } else if (index === 0) { // If first file removed, update dimensions from new first file
+                        const firstFile = files[0];
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const img = new Image();
+                            img.onload = function() {
+                                originalWidth = this.width;
+                                originalHeight = this.height;
+                                if (resizeCheckbox.checked && maintainAspect.checked && widthInput.value > 0) {
+                                    const aspectRatio = this.height / this.width;
+                                    heightInput.value = Math.round(widthInput.value * aspectRatio);
+                                }
+                            };
+                            img.src = e.target.result;
+                        };
+                        reader.readAsDataURL(firstFile);
+                    }
                 }, 300);
             }
         }
@@ -1114,15 +1196,18 @@
             // Animate out all preview items
             const previewItems = document.querySelectorAll('.preview-item');
             previewItems.forEach((item, index) => {
+                item.style.transition = 'transform 0.3s ease, opacity 0.3s ease'; // Ensure transition is set
+                item.style.transitionDelay = `${index * 0.05}s`;
                 item.style.transform = 'scale(0.9)';
                 item.style.opacity = '0';
-                item.style.transitionDelay = `${index * 0.05}s`;
             });
             
             setTimeout(() => {
                 files = [];
                 updateFilePreviews();
-                fileInput.value = '';
+                fileInput.value = ''; // Reset file input
+                originalWidth = 0;
+                originalHeight = 0;
                 showToast('All files cleared');
             }, 300 + (previewItems.length * 50));
         }
@@ -1139,9 +1224,10 @@
             qualitySlider.value = 85;
             qualityValue.textContent = '85';
             resizeCheckbox.checked = false;
-            resizeOptions.style.display = 'none';
-            widthInput.value = '800';
-            heightInput.value = '600';
+            resizeOptions.style.display = 'none'; // Ensure it's hidden
+            // Update width/height based on original image if available, else default
+            widthInput.value = originalWidth > 0 ? originalWidth : '800';
+            heightInput.value = originalHeight > 0 ? originalHeight : '600';
             maintainAspect.checked = true;
             optimizeCheckbox.checked = true;
             preserveMetadata.checked = false;
@@ -1155,7 +1241,7 @@
             if (toastTimeout) clearTimeout(toastTimeout);
             
             // Set toast content and style
-            toast.className = `toast ${type}`;
+            toast.className = `toast ${type}`; // Base classes
             toastMessage.textContent = message;
             
             // Set appropriate icon
@@ -1164,18 +1250,20 @@
                 icon.className = 'fas fa-check-circle';
             } else if (type === 'error') {
                 icon.className = 'fas fa-exclamation-circle';
+            } else if (type === 'warning') { // Added warning type
+                icon.className = 'fas fa-exclamation-triangle';
+                toast.style.backgroundColor = 'var(--warning-color)'; // Use warning color for warning toasts
             }
             
             // Show the toast
             toast.classList.add('show');
+            toast.classList.remove('hide'); // remove hide if it was there
             
             // Hide after delay
             toastTimeout = setTimeout(() => {
                 toast.classList.remove('show');
                 toast.classList.add('hide');
-                setTimeout(() => {
-                    toast.classList.remove('hide');
-                }, 600);
+                // No need for another timeout to remove 'hide', CSS animation handles it
             }, 3000);
         }
 
@@ -1195,9 +1283,8 @@
             convertBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
             convertedFiles = [];
-            const zip = new JSZip();
-            const imgFolder = zip.folder("converted_images");
-
+            // JSZip instance is created inside downloadAll function now
+            
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 statusText.textContent = `Processing ${i + 1} of ${files.length}: ${file.name}`;
@@ -1210,11 +1297,9 @@
                     const convertedFile = await processImage(file);
                     convertedFiles.push(convertedFile);
                     
-                    // Add to ZIP
-                    imgFolder.file(convertedFile.name, convertedFile.blob);
                 } catch (error) {
                     console.error(`Error processing ${file.name}:`, error);
-                    showToast(`Error processing ${file.name}`, 'error');
+                    showToast(`Error processing ${file.name}: ${error.message || error}`, 'error');
                 }
             }
 
@@ -1226,9 +1311,13 @@
             convertBtn.disabled = false;
             convertBtn.innerHTML = '<i class="fas fa-exchange-alt"></i> Convert Images';
             
-            // Show download section with animation
-            showDownloadSection();
-            showToast(`Successfully converted ${convertedFiles.length} images`);
+            if (convertedFiles.length > 0) {
+                showDownloadSection();
+                showToast(`Successfully converted ${convertedFiles.length} images`);
+            } else {
+                 showToast(`No images were converted. Check for errors.`, 'error');
+                 progressContainer.style.display = 'none'; // Hide progress if nothing converted
+            }
             
             // Show interstitial ad after conversion (mobile only)
             showInterstitialAd();
@@ -1236,17 +1325,21 @@
 
         function animateProgress(element, target) {
             const start = parseFloat(element.style.width) || 0;
-            const duration = 500; // ms
+            const duration = 300; // ms, reduced for snappier feel
             const startTime = performance.now();
             
             function updateProgress(currentTime) {
                 const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
+                let progress = Math.min(elapsed / duration, 1);
+                // Apply easing function (easeOutQuad)
+                progress = progress * (2 - progress); 
                 const value = start + (target - start) * progress;
                 element.style.width = `${value}%`;
                 
-                if (progress < 1) {
+                if (elapsed < duration) {
                     requestAnimationFrame(updateProgress);
+                } else {
+                    element.style.width = `${target}%`; // Ensure it reaches target
                 }
             }
             
@@ -1264,22 +1357,35 @@
                         const ctx = canvas.getContext('2d');
                         
                         // Calculate new dimensions
-                        let newWidth = img.width;
-                        let newHeight = img.height;
+                        let targetWidth = img.width;
+                        let targetHeight = img.height;
                         
                         if (resizeCheckbox.checked) {
-                            newWidth = parseInt(widthInput.value);
-                            newHeight = parseInt(heightInput.value);
+                            let W = parseInt(widthInput.value);
+                            let H = parseInt(heightInput.value);
+
+                            if (isNaN(W) || W <=0) W = img.width; // fallback to original if invalid
+                            if (isNaN(H) || H <=0) H = img.height; // fallback to original if invalid
                             
                             if (maintainAspect.checked) {
-                                const aspectRatio = img.height / img.width;
-                                newHeight = Math.round(newWidth * aspectRatio);
+                                const currentAspectRatio = img.width / img.height;
+                                // Adjust based on which dimension is driving the resize more, or if one is unset
+                                if (W / H > currentAspectRatio) { // new aspect ratio is wider, so height is constraining
+                                    targetHeight = H;
+                                    targetWidth = Math.round(H * currentAspectRatio);
+                                } else { // new aspect ratio is taller or same, so width is constraining
+                                    targetWidth = W;
+                                    targetHeight = Math.round(W / currentAspectRatio);
+                                }
+                            } else {
+                                targetWidth = W;
+                                targetHeight = H;
                             }
                         }
                         
                         // Set canvas dimensions
-                        canvas.width = newWidth;
-                        canvas.height = newHeight;
+                        canvas.width = targetWidth;
+                        canvas.height = targetHeight;
                         
                         // Apply grayscale if needed
                         if (grayscale.checked) {
@@ -1287,45 +1393,59 @@
                         }
                         
                         // Draw image
-                        ctx.drawImage(img, 0, 0, newWidth, newHeight);
+                        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
                         
                         // Get output format
-                        let format = formatSelect.value;
-                        if (format === 'jpg') format = 'jpeg'; // Correct MIME type
+                        let outputFormat = formatSelect.value;
+                        const mimeType = `image/${outputFormat === 'jpg' ? 'jpeg' : outputFormat}`;
                         
                         // Quality (only applies to JPEG/WebP)
-                        let quality = parseInt(qualitySlider.value) / 100;
-                        if (format !== 'jpeg' && format !== 'webp') {
-                            quality = undefined;
+                        let qualitySetting = parseInt(qualitySlider.value) / 100;
+                        if (outputFormat !== 'jpeg' && outputFormat !== 'webp' && outputFormat !== 'jpg') {
+                            qualitySetting = undefined; // For PNG etc., quality is not applicable or handled differently
                         }
                         
                         // Convert to blob
                         canvas.toBlob((blob) => {
+                            if (!blob) {
+                                reject(new Error(`Failed to convert to ${outputFormat}. Output blob is null.`));
+                                return;
+                            }
                             // Create new file name
-                            const fileName = file.name.replace(/\.[^/.]+$/, '') + '.' + format;
+                            const originalName = file.name.substring(0, file.name.lastIndexOf('.'));
+                            const newFileName = `${originalName}.${outputFormat}`;
                             
                             resolve({
-                                name: fileName,
+                                name: newFileName,
                                 blob: blob,
-                                url: URL.createObjectURL(blob)
+                                url: URL.createObjectURL(blob) // For potential direct use, though saveAs uses blob
                             });
-                        }, `image/${format}`, quality);
+                        }, mimeType, qualitySetting);
                     };
-                    img.onerror = reject;
+                    img.onerror = (err) => {
+                        console.error("Image load error:", err);
+                        reject(new Error(`Could not load image: ${file.name}`));
+                    };
                     img.src = e.target.result;
                 };
-                reader.onerror = reject;
+                reader.onerror = (err) => {
+                    console.error("FileReader error:", err);
+                    reject(new Error(`Could not read file: ${file.name}`));
+                };
                 reader.readAsDataURL(file);
             });
         }
 
         function showDownloadSection() {
             downloadSection.style.display = 'block';
-            downloadList.innerHTML = '';
+            downloadList.innerHTML = ''; // Clear previous list
             
             convertedFiles.forEach((file, index) => {
                 const li = document.createElement('li');
-                li.style.animationDelay = `${index * 0.1}s`;
+                li.style.animation = 'fadeInUp 0.3s ease-out'; // Add animation to list items
+                li.style.animationDelay = `${index * 0.05}s`;
+                li.style.opacity = 0; // Start transparent for animation
+                setTimeout(() => li.style.opacity = 1, 0); // Trigger animation
                 
                 const fileInfo = document.createElement('div');
                 fileInfo.className = 'file-info';
@@ -1337,10 +1457,16 @@
                     </div>
                 `;
                 
-                const downloadBtn = document.createElement('button');
+                const downloadBtn = document.createElement('a'); // Changed to <a> for direct download
                 downloadBtn.className = 'btn btn-outline';
                 downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
-                downloadBtn.addEventListener('click', () => downloadFile(file));
+                downloadBtn.href = file.url; // Use object URL
+                downloadBtn.download = file.name; // Set download attribute
+                
+                downloadBtn.addEventListener('click', (e) => {
+                    // Optional: add visual feedback here if needed, though direct download is clean
+                    showToast(`Downloading ${file.name}`);
+                });
                 
                 li.appendChild(fileInfo);
                 li.appendChild(downloadBtn);
@@ -1349,33 +1475,24 @@
             
             // Scroll to download section with smooth animation
             setTimeout(() => {
-                downloadSection.scrollIntoView({ behavior: 'smooth' });
+                downloadSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 100);
         }
 
-        function downloadFile(file) {
-            saveAs(file.blob, file.name);
-            
-            // Add visual feedback
-            const buttons = document.querySelectorAll('.download-list button');
-            buttons.forEach(btn => {
-                if (btn.textContent.includes(file.name)) {
-                    btn.innerHTML = '<i class="fas fa-check"></i> Downloaded';
-                    btn.style.backgroundColor = 'var(--success-color)';
-                    setTimeout(() => {
-                        btn.innerHTML = '<i class="fas fa-download"></i> Download';
-                        btn.style.backgroundColor = '';
-                    }, 2000);
-                }
-            });
-            
-            showToast(`Downloaded ${file.name}`);
-        }
+        // downloadFile function is not strictly needed if using <a> tag with download attribute
+        // function downloadFile(file) {
+        //     saveAs(file.blob, file.name);
+        //     showToast(`Downloaded ${file.name}`);
+        // }
 
         function downloadAll() {
-            if (convertedFiles.length === 0) return;
+            if (convertedFiles.length === 0) {
+                showToast('No files to download.', 'warning');
+                return;
+            }
             
             // Visual feedback
+            downloadAllBtn.disabled = true;
             downloadAllBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating ZIP...';
             
             // Generate ZIP
@@ -1383,62 +1500,90 @@
             const imgFolder = zip.folder("converted_images");
             
             convertedFiles.forEach(file => {
-                imgFolder.file(file.name, file.blob);
+                imgFolder.file(file.name, file.blob, {binary:true});
             });
             
             // Generate ZIP file
-            zip.generateAsync({ type: 'blob' }).then(content => {
+            zip.generateAsync({ type: 'blob' }, (metadata) => {
+                // Optional: update progress for zipping if needed
+                // statusText.textContent = `Zipping... ${metadata.percent.toFixed(0)}%`;
+            }).then(content => {
                 saveAs(content, 'converted_images.zip');
                 
                 // Restore button state
+                downloadAllBtn.disabled = false;
                 downloadAllBtn.innerHTML = '<i class="fas fa-file-archive"></i> Download All as ZIP';
                 
-                // Visual feedback
                 showToast('Downloaded all files as ZIP archive');
+            }).catch(err => {
+                console.error("Error creating ZIP:", err);
+                showToast('Error creating ZIP file.', 'error');
+                downloadAllBtn.disabled = false;
+                downloadAllBtn.innerHTML = '<i class="fas fa-file-archive"></i> Download All as ZIP';
             });
         }
 
         function newConversion() {
             // Animate out the download section
-            downloadSection.style.animation = 'fadeOut 0.5s ease-out';
+            if (downloadSection.style.display !== 'none') {
+                downloadSection.style.animation = 'fadeOut 0.5s ease-out forwards';
+            }
             
             // Animate out the progress bar
-            progressContainer.style.animation = 'fadeOut 0.5s ease-out';
+            if (progressContainer.style.display !== 'none') {
+                progressContainer.style.animation = 'fadeOut 0.5s ease-out forwards';
+            }
             
             setTimeout(() => {
                 files = [];
                 convertedFiles = [];
-                updateFilePreviews();
-                downloadSection.style.display = 'none';
-                progressContainer.style.display = 'none';
-                fileInput.value = '';
+                updateFilePreviews(); // Clears previews and resets originalWidth/Height
                 
-                // Reset animations
-                downloadSection.style.animation = '';
-                progressContainer.style.animation = '';
-            }, 500);
+                if (downloadSection.style.display !== 'none') {
+                    downloadSection.style.display = 'none';
+                    downloadSection.style.animation = ''; // Reset animation property
+                }
+                if (progressContainer.style.display !== 'none') {
+                    progressContainer.style.display = 'none';
+                    progressContainer.style.animation = ''; // Reset animation property
+                }
+                
+                fileInput.value = ''; // Clear file input
+                resetSettings(); // Reset settings to default or based on (now cleared) first image
+                showToast('Ready for new conversion.', 'success');
+
+                // Scroll to top smoothly
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            }, 500); // Wait for fadeOut animation
         }
 
         function formatFileSize(bytes) {
             if (bytes === 0) return '0 Bytes';
             const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']; // Added TB
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
         // Interstitial Ad Function
         function showInterstitialAd() {
-            // Only show on mobile devices
+            // This function is for Cordova/Capacitor AdMob plugins.
+            // For a web page, you would use AdSense for content auto ads or other formats.
+            // The current 'adsbygoogle' tags are for AdSense display ads.
             if (/Mobi|Android/i.test(navigator.userAgent)) {
-                // Show interstitial ad after conversion is complete
-                if (typeof admob !== 'undefined') {
-                    admob.interstitial.show()
-                        .then(() => console.log('Interstitial ad shown'))
-                        .catch(e => console.log('Error showing interstitial', e));
+                if (typeof admob !== 'undefined' && admob.interstitial) { // Check if admob.interstitial exists
+                    admob.interstitial.load({ id: { android: 'ca-app-pub-3940256099942544/1033173712' } }) // Example test ID
+                    .then(() => admob.interstitial.show())
+                    .then(() => console.log('Interstitial ad shown'))
+                    .catch(e => console.log('Error with interstitial ad:', e));
+                } else {
+                    // console.log('AdMob interstitial object not available.');
                 }
             }
         }
+        // Initialize with default resize values if no image is loaded yet
+        resetSettings();
     </script>
 </body>
 </html>
